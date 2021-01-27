@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <style type="text/css">
+        body {
+            font-family: Arial;
+            font-size: 10pt;
+        }
+    </style>
+</head>
+<body>
+    <select name="slcAlbum" id="slcAlbum">
+        <option>Seleccione</option>
+    </select>
+
+    <table class="flexme" id="table" border="1">
+        <thead>
+            <tr>
+                <th width="100">Foto</th>
+                <th width="100">Titulo</th>
+                <th width="100">Url</th>
+                <th width="100">Comentario</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div id="tableComment">
+        <table class="flexme" id="tableComment" border="1">
+            <thead>
+                <tr>
+                    <th width="100">Nombre</th>
+                    <th width="100">Correo</th>
+                    <th width="500">Comentario</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>   
+
+</body>
+
+</html>
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script>
+    //Album
+
+    $('#tableComment').hide();
+    var lstAlbum = "";
+    $.ajax({
+        url: "https://jsonplaceholder.typicode.com/albums",
+        type: "get",
+        success: function (response) {
+            for (var i = 0; i < response.length; i++) {
+                lstAlbum += "<option value '" + response[i].id + "'>" + response[i].title + "</option>";
+            }
+
+            $("#slcAlbum").append(lstAlbum); 
+        },
+        error: function () {
+            alert("failure album");
+        }
+    });
+
+    $("#slcAlbum").change(function () {
+
+        $("#tableComment tbody tr").remove();
+        var val = this.selectedIndex;
+        loadPhoto(val);
+    });
+
+
+    function loadPhoto(val) {
+
+        $('#tableComment').hide();
+        //Fotos
+        $.ajax({
+            url: "https://jsonplaceholder.typicode.com/photos/" + val,
+            type: "get",
+            success: function (response) {
+
+                   var id = response.id;
+                    var title = response.title;
+                    var url = response.url;
+                    var thumbnailUrl = response.thumbnailUrl;
+                $("#table tbody tr").remove();
+                $('#table tbody').append(
+                    '<tr><td>' + '<img src="' + thumbnailUrl +'"' + '</td><td>'
+                    + title + '</td><td>' +
+                    url + '</td><td>' 
+                    + '<button onclick="loadComment(' + id+')"'+  '>Ver comentarios</button >' + '</td></tr>')
+            },
+            error: function () {
+                alert("failure photo");
+            }
+        });
+    }
+
+    function loadComment(val) {
+        $('#tableComment').show();
+        //Comentarios
+        $.ajax({
+            url: "https://jsonplaceholder.typicode.com/comments/" + val,
+            type: "get",
+            success: function (response) {
+
+                var name = response.name;
+                var email = response.email;
+                var body = response.body;
+
+                $("#tableComment tbody tr").remove();
+                $('#tableComment tbody').append(
+                    '<tr><td>' + name + '</td><td>'
+                    + email + '</td><td>' +
+                    body + '</td>' +'</tr>')
+            },
+            error: function () {
+                alert("failure photo");
+            }
+        });
+    }
+</script>
